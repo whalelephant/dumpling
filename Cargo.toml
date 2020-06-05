@@ -1,0 +1,60 @@
+[package]
+name = "dumpling"
+version = "0.1.0"
+authors = ["bwty <whalelephant@users.noreply.github.com>"]
+edition = "2018"
+
+[lib]
+name = "dumpling"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dumpling"
+path = "src/bin.rs"
+
+[dependencies]
+codec = { package = "parity-scale-codec", version = "1.3", default-features = false, features = ["derive", "full"] }
+hex = { version = "0.4", default-features = false }
+comfy-table = "0.1.1"
+clap = "~2.33"
+
+[dependencies.substrate-api-client]
+path = "../substrate-api-client-forked"
+# git = "https://github.com/scs/substrate-api-client"
+# rev = "cce8441c09224ab641619ea077b5b7fb118f6bf6"
+
+[dependencies.sp-core]
+version = '2.0.0-alpha.7'
+package = "sp-core"
+default-features = false
+features = ["full_crypto"]
+
+[dependencies.sp-runtime]
+version = '2.0.0-alpha.7'
+package = "sp-runtime"
+default-features = false
+
+[dependencies.sp-staking]
+version = '2.0.0-alpha.7'
+package = "sp-staking"
+default-features = false
+
+[dependencies.staking]
+version = '2.0.0-alpha.7'
+package = "pallet-staking"
+default-features=false
+
+[dependencies.polkadot-primitives]
+package = "polkadot-primitives"
+version = "0.8.2"
+git = "https://github.com/paritytech/polkadot"
+
+[features]
+default = ["std"]
+std = [
+	"sp-core/std",
+	"sp-runtime/std",
+	"sp-staking/std",
+	"codec/std",
+    "staking/std",
+]
