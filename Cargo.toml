@@ -16,7 +16,7 @@ path = "src/bin.rs"
 codec = { package = "parity-scale-codec", version = "1.3", default-features = false, features = ["derive", "full"] }
 hex = { version = "0.4", default-features = false }
 comfy-table = "0.1.1"
-clap = "~2.33"
+clap = { version = "~2.33", features = ["yaml"] }
 
 [dependencies.substrate-api-client]
 path = "../substrate-api-client-forked"

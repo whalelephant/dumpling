@@ -1,82 +1,12 @@
-use clap::{App, Arg};
+use clap::{App, load_yaml};
 use comfy_table::*;
 use dumpling::{AccountId, Dumpling, Ss58Codec};
 use std::collections::HashMap;
 
 pub fn main() {
     let d = Dumpling::new("127.0.0.1:9944", "polkadot");
-
-    let matches = App::new("dumpling")
-        .version("0.1")
-        .author("Belsy Y <ByHogwartsExpress@pm.me>")
-        .about("Polkadot Validator CLI tool")
-        .subcommand(
-            App::new("pulse").about("useful state information such as session index").args(&[
-                Arg::with_name("activeEra")
-                    .help("Active Era")
-                    .long("activeEra")
-                    .short("a")
-                    .multiple(false),
-                Arg::with_name("block")
-                    .help("Current finalised block")
-                    .long("block")
-                    .short("b")
-                    .multiple(false),
-                Arg::with_name("plannedEra")
-                    .help("Current Era (planned)")
-                    .long("plannedEra")
-                    .short("c")
-                    .multiple(false),
-                Arg::with_name("sessionIndex")
-                    .help("Current session index")
-                    .long("sessionIndex")
-                    .short("s")
-                    .multiple(false),
-            ]),
-        )
-        .subcommand(
-            App::new("validators")
-                .about("lists of validators and their information")
-                .args(&[
-                    Arg::with_name("session")
-                        .help("Session validators")
-                        .long("session")
-                        .short("s")
-                        .multiple(false),
-                    Arg::with_name("queued")
-                        .help("Queued validators with nominators' exposures and own exposure and ledger")
-                        .long("queued")
-                        .short("q")
-                        .multiple(false),
-                    Arg::with_name("waiting")
-                        .help("waiting validators with their stake ledger and preferences")
-                        .long("waiting")
-                        .short("w")
-                        .multiple(false),
-                    Arg::with_name("accountId")
-                        .help("get waiting validator by accountId")
-                        .long("account")
-                        .short("a")
-                        .takes_value(true)
-                        .multiple(false)
-                        .requires("waiting")
-                        .conflicts_with_all(&[&"queued", &"session"])
-                ]),
-        )
-        .subcommand(
-            App::new("nominators")
-                .about("list of nominators and their information")
-                .arg(
-                    Arg::with_name("accountId")
-                        .help("get nominator by accountId")
-                        .long("account")
-                        .short("a")
-                        .takes_value(true)
-                        .multiple(false)
-                        .required(false)
-                )
-        )
-        .get_matches();
+    let yaml = load_yaml!("cli.yml");
+    let matches = App::from(yaml).get_matches();
 
     match matches.subcommand() {
         ("pulse", Some(p_matches)) => {

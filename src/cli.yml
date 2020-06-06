@@ -1,0 +1,67 @@
+name: dumpling
+version: "0.1"
+author: B. Y. <ByHogwarsExpress@pm.me>
+about: Polkadot Validator CLI tool
+subcommands:
+    - pulse:
+        about: useful state information
+        args:
+            - activeEra:
+                help: Active Era
+                multiple: false
+                long: activeEra
+                short: a
+            - block:
+                help: Current finalised block
+                multiple: false
+                long: block
+                short: b
+            - plannedEra:
+                help: Current Era (planned)
+                multiple: false
+                long: plannedEra
+                short: c
+            - sessionIndex:
+                help: Current session index
+                multiple: false
+                long: sessionIndex
+                short: s
+    - validators:
+        about: lists of validators and their information
+        args:
+            - session:
+                help: Session validators
+                multiple: false
+                long: session
+                short: s
+            - queued:
+                help: Queued validators with nominators' exposures and own exposure
+                multiple: false
+                long: queued
+                short: q
+            - waiting:
+                help: Waiting validators with their stake ledger and preferences
+                multiple: false
+                long: waiting
+                short: w
+            - accountId:
+                help: Get waiting validator by accountId
+                multiple: false
+                required: false
+                long: account
+                short: a
+                takes_value: true
+                requires: waiting
+                conflicts_with: ["queued", "session"]
+    - nominators:
+        about: list of nominators and their information
+        args:
+            - accountId:
+                help: Get nominator by accountId
+                multiple: false
+                long: account
+                short: a
+                takes_value: true
+                required: false
+
+
