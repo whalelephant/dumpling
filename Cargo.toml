@@ -17,11 +17,12 @@ codec = { package = "parity-scale-codec", version = "1.3", default-features = fa
 hex = { version = "0.4", default-features = false }
 comfy-table = "0.1.1"
 clap = { version = "~2.33", features = ["yaml"] }
+rustyline = "6.2.0"
+shellwords = "1.0.0"
 
 [dependencies.substrate-api-client]
-path = "../substrate-api-client-forked"
-# git = "https://github.com/scs/substrate-api-client"
-# rev = "cce8441c09224ab641619ea077b5b7fb118f6bf6"
+git = "https://github.com/whalelephant/substrate-api-client"
+branch = "map_without_default"
 
 [dependencies.sp-core]
 version = '2.0.0-alpha.7'

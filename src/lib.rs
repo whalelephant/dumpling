@@ -18,11 +18,11 @@ use std::collections::HashMap;
 use substrate_api_client::Api;
 
 /// Dumpling is a simple wrapper around substrate-api-client
-pub struct Dumpling {
+pub struct ApiFilling {
     pub api: Api<sr25519::Pair>,
 }
 
-impl Dumpling {
+impl ApiFilling {
     /// Create Dumpling with:
     ///
     /// url string - node_ip:node_port
@@ -68,7 +68,7 @@ impl Dumpling {
         &self,
         block_hash: Option<Hash>,
     ) -> HashMap<
-        AccountId,
+        String,
         (
             Option<StakingLedger<AccountId, Balance>>,
             Option<ValidatorPrefs>,
@@ -88,7 +88,7 @@ impl Dumpling {
                 .api
                 .get_storage_by_key_hash::<ValidatorPrefs>(storage_key, None);
 
-            waitlist.insert(account_id, (ledger, validator_prefs));
+            waitlist.insert(account_id.to_ss58check(), (ledger, validator_prefs));
         }
         waitlist
     }

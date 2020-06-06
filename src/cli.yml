@@ -2,6 +2,7 @@ name: dumpling
 version: "0.1"
 author: B. Y. <ByHogwarsExpress@pm.me>
 about: Polkadot Validator CLI tool
+setting: NoBinaryName
 subcommands:
     - pulse:
         about: useful state information
@@ -63,5 +64,5 @@ subcommands:
                 short: a
                 takes_value: true
                 required: false
-
-
+    - exit:
+        about: exits dumpling

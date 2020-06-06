@@ -58,19 +58,19 @@ FLAGS:
 OPTIONS:
     -a, --account <accountId>    get nominator by accountId 
 ```
-
-#### Example:
-`dumpling validators --waiting --account=AccountId
-
-//TODO image
-
 ___
 ## Usage
+
+#### Node
+This tool currently works with Polkadot: v0.8.1
 
 #### CLI
 1. Clone this repo
 1. Cargo build --release
-1. `./target/release/dumpling --help` to begin
+1. `./target/release/dumpling` to enter the mini terminal
+
+Example: 
+![myimage-alt-tag](./example.png)
 
 #### Lib
 As specified in `Cargo.toml`, you can also use this project as a library for your project in rust or other native modules.
@@ -96,8 +96,6 @@ Command-line Polkadot API interaction:
 - Tools to help validators: Validators will be signaling their intention to nominate in the initial PoA phase. It would be great to have tools made specifically for them, such as seeing how much stake is behind others who have signaled their intention to validate.
 
 TODO:
-- flag required 
-- Error handling
 - active Era get time
 - parse int sp_arithmatic
 
