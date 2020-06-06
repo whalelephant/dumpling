@@ -140,6 +140,18 @@ pub fn main() {
                                     );
                                     let m = d.waiting_validators(None);
 
+                                    let mut t_total = Table::new();
+                                    t_total.set_header(vec![
+                                        Cell::new("Total Waiting Validators")
+                                            .add_attribute(Attribute::Bold)
+                                            .bg(Color::Black)
+                                            .fg(Color::Magenta),
+                                        Cell::new(format!("{}", m.keys().len()))
+                                            .bg(Color::Black)
+                                            .fg(Color::Blue),
+                                    ]);
+
+                                    println!("{}", t_total);
                                     if let Some(account) = v_matches.value_of("accountId") {
                                         match m.get(account) {
                                             Some(a) => {
@@ -212,7 +224,6 @@ pub fn main() {
                                         }
                                     }
                                     println!("{}", t);
-                                    println!("Total waiting validators: {}", m.keys().len());
                                 } else {
                                     println!("Missing / Incorrect Arg; try --help for information");
                                 }
