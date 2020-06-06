@@ -96,8 +96,8 @@ Command-line Polkadot API interaction:
 - Tools to help validators: Validators will be signaling their intention to nominate in the initial PoA phase. It would be great to have tools made specifically for them, such as seeing how much stake is behind others who have signaled their intention to validate.
 
 TODO:
-- move client() out of lib 
 - flag required 
+- Error handling
 - active Era get time
 - parse int sp_arithmatic
 

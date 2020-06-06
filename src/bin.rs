@@ -1,10 +1,11 @@
 use clap::{App, Arg};
 use comfy_table::*;
-use dumpling;
-use sp_core::crypto::Ss58Codec;
+use dumpling::{AccountId, Dumpling, Ss58Codec};
 use std::collections::HashMap;
 
 pub fn main() {
+    let d = Dumpling::new("127.0.0.1:9944", "polkadot");
+
     let matches = App::new("dumpling")
         .version("0.1")
         .author("Belsy Y <ByHogwartsExpress@pm.me>")
@@ -84,10 +85,7 @@ pub fn main() {
                 table_header(&mut t, vec!["Active Era"], 80);
                 add_row(
                     &mut t,
-                    vec![(
-                        format!("{:?}", dumpling::active_era(None).unwrap()),
-                        Color::Blue,
-                    )],
+                    vec![(format!("{:?}", d.active_era(None).unwrap()), Color::Blue)],
                 );
 
                 println!("{}", t);
@@ -98,7 +96,7 @@ pub fn main() {
                     vec!["Finalised block hash", "Finalised block number"],
                     160,
                 );
-                let b = dumpling::finalized_head();
+                let b = d.finalized_head();
                 add_row(
                     &mut t,
                     vec![
@@ -112,10 +110,7 @@ pub fn main() {
                 table_header(&mut t, vec!["Planned Era"], 80);
                 add_row(
                     &mut t,
-                    vec![(
-                        format!("{}", dumpling::planned_era(None).unwrap()),
-                        Color::Blue,
-                    )],
+                    vec![(format!("{}", d.planned_era(None).unwrap()), Color::Blue)],
                 );
 
                 println!("{}", t);
@@ -124,10 +119,7 @@ pub fn main() {
                 table_header(&mut t, vec!["Session Index"], 80);
                 add_row(
                     &mut t,
-                    vec![(
-                        format!("{}", dumpling::session_index(None).unwrap()),
-                        Color::Yellow,
-                    )],
+                    vec![(format!("{}", d.session_index(None).unwrap()), Color::Yellow)],
                 );
 
                 println!("{}", t);
@@ -140,7 +132,7 @@ pub fn main() {
             if v_matches.is_present("session") {
                 let mut t = Table::new();
                 table_header(&mut t, vec!["Seesion Validator Stash"], 80);
-                let v = dumpling::session_validators(None).unwrap();
+                let v = d.session_validators(None).unwrap();
                 for i in v {
                     add_row(&mut t, vec![(i.to_ss58check(), Color::Yellow)]);
                 }
@@ -158,7 +150,7 @@ pub fn main() {
                     ],
                     160,
                 );
-                let v = dumpling::queued_validators(None).unwrap();
+                let v = d.queued_validators(None).unwrap();
                 for i in v.exposures {
                     let mut fmt_exposures = HashMap::new();
                     let indv_exposures = (i.1).others;
@@ -191,10 +183,10 @@ pub fn main() {
                     ],
                     160,
                 );
-                let m = dumpling::waiting_validators(None);
+                let m = d.waiting_validators(None);
 
                 if let Some(account) = v_matches.value_of("accountId") {
-                    let account_id = dumpling::AccountId::from_ss58check(account)
+                    let account_id = AccountId::from_ss58check(account)
                         .unwrap_or_else(|_| panic!("Error in getting SS58 account"));
                     match m.get(&account_id) {
                         Some(a) => {
@@ -262,7 +254,7 @@ pub fn main() {
                 vec!["Nominator Stash", "Targets", "Era Submitted", "Suppressed"],
                 160,
             );
-            let m = dumpling::nominators(None);
+            let m = d.nominators(None);
 
             if let Some(account) = n_matches.value_of("accountId") {
                 match m.get(account) {
