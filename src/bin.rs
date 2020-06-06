@@ -1,9 +1,9 @@
-use clap::{App, load_yaml, Error, ErrorKind};
+use clap::{load_yaml, App, Error, ErrorKind};
 use comfy_table::*;
 use dumpling::{ApiFilling, Ss58Codec};
-use std::collections::HashMap;
 use rustyline::{error::ReadlineError, Editor};
 use shellwords::split;
+use std::collections::HashMap;
 
 pub fn main() {
     let d = ApiFilling::new("127.0.0.1:9944", "polkadot");
@@ -28,9 +28,12 @@ pub fn main() {
                                     table_header(&mut t, vec!["Active Era"], 80);
                                     add_row(
                                         &mut t,
-                                        vec![(format!("{:?}", d.active_era(None).unwrap()), Color::Blue)],
+                                        vec![(
+                                            format!("{:?}", d.active_era(None).unwrap()),
+                                            Color::Blue,
+                                        )],
                                     );
-                    
+
                                     println!("{}", t);
                                 } else if p_matches.is_present("block") {
                                     let mut t = Table::new();
@@ -53,16 +56,22 @@ pub fn main() {
                                     table_header(&mut t, vec!["Planned Era"], 80);
                                     add_row(
                                         &mut t,
-                                        vec![(format!("{}", d.planned_era(None).unwrap()), Color::Blue)],
+                                        vec![(
+                                            format!("{}", d.planned_era(None).unwrap()),
+                                            Color::Blue,
+                                        )],
                                     );
-                    
+
                                     println!("{}", t);
                                 } else if p_matches.is_present("sessionIndex") {
                                     let mut t = Table::new();
                                     table_header(&mut t, vec!["Session Index"], 80);
                                     add_row(
                                         &mut t,
-                                        vec![(format!("{}", d.session_index(None).unwrap()), Color::Yellow)],
+                                        vec![(
+                                            format!("{}", d.session_index(None).unwrap()),
+                                            Color::Yellow,
+                                        )],
                                     );
 
                                     println!("{}", t);
@@ -82,7 +91,7 @@ pub fn main() {
                                     for i in v {
                                         add_row(&mut t, vec![(i.to_ss58check(), Color::Yellow)]);
                                     }
-                    
+
                                     println!("{}", t);
                                 } else if v_matches.is_present("queued") {
                                     let mut t = Table::new();
@@ -113,7 +122,7 @@ pub fn main() {
                                             ],
                                         );
                                     }
-                    
+
                                     println!("{}", t);
                                 } else if v_matches.is_present("waiting") {
                                     let mut t = Table::new();
@@ -130,7 +139,7 @@ pub fn main() {
                                         160,
                                     );
                                     let m = d.waiting_validators(None);
-                    
+
                                     if let Some(account) = v_matches.value_of("accountId") {
                                         match m.get(account) {
                                             Some(a) => {
@@ -141,7 +150,10 @@ pub fn main() {
                                                     ("---".to_string(), Color::Yellow),
                                                     ("---".to_string(), Color::Yellow),
                                                     (
-                                                        format!("{:?}", a.1.as_ref().unwrap().commission),
+                                                        format!(
+                                                            "{:?}",
+                                                            a.1.as_ref().unwrap().commission
+                                                        ),
                                                         Color::Magenta,
                                                     ),
                                                 ];
@@ -149,14 +161,23 @@ pub fn main() {
                                                     let n = [
                                                         (format!("{}", l.total), Color::Yellow),
                                                         (format!("{}", l.active), Color::Yellow),
-                                                        (format!("{:#?}", l.unlocking), Color::Yellow),
-                                                        (format!("{:#?}", l.claimed_rewards), Color::Yellow),
+                                                        (
+                                                            format!("{:#?}", l.unlocking),
+                                                            Color::Yellow,
+                                                        ),
+                                                        (
+                                                            format!("{:#?}", l.claimed_rewards),
+                                                            Color::Yellow,
+                                                        ),
                                                     ];
                                                     row.splice(1..5, n.iter().cloned());
                                                 }
                                                 add_row(&mut t, row);
                                             }
-                                            None => println!("{} is not on the waiting validators list", account),
+                                            None => println!(
+                                                "{} is not on the waiting validators list",
+                                                account
+                                            ),
                                         }
                                     } else {
                                         for (k, v) in m.iter() {
@@ -167,7 +188,10 @@ pub fn main() {
                                                 ("---".to_string(), Color::Yellow),
                                                 ("---".to_string(), Color::Yellow),
                                                 (
-                                                    format!("{:?}", v.1.as_ref().unwrap().commission),
+                                                    format!(
+                                                        "{:?}",
+                                                        v.1.as_ref().unwrap().commission
+                                                    ),
                                                     Color::Magenta,
                                                 ),
                                             ];
@@ -176,11 +200,14 @@ pub fn main() {
                                                     (format!("{}", l.total), Color::Yellow),
                                                     (format!("{}", l.active), Color::Yellow),
                                                     (format!("{:#?}", l.unlocking), Color::Yellow),
-                                                    (format!("{:#?}", l.claimed_rewards), Color::Yellow),
+                                                    (
+                                                        format!("{:#?}", l.claimed_rewards),
+                                                        Color::Yellow,
+                                                    ),
                                                 ];
                                                 row.splice(1..5, n.iter().cloned());
                                             }
-                    
+
                                             add_row(&mut t, row);
                                         }
                                     }
@@ -194,11 +221,16 @@ pub fn main() {
                                 let mut t = Table::new();
                                 table_header(
                                     &mut t,
-                                    vec!["Nominator Stash", "Targets", "Era Submitted", "Suppressed"],
+                                    vec![
+                                        "Nominator Stash",
+                                        "Targets",
+                                        "Era Submitted",
+                                        "Suppressed",
+                                    ],
                                     160,
                                 );
                                 let m = d.nominators(None);
-                    
+
                                 if let Some(account) = n_matches.value_of("accountId") {
                                     match m.get(account) {
                                         Some(n) => match n {
@@ -212,17 +244,26 @@ pub fn main() {
                                                     vec![
                                                         (account.to_string(), Color::Blue),
                                                         (format!("{:#?}", targets), Color::Yellow),
-                                                        (format!("{}", l.submitted_in), Color::Yellow),
-                                                        (format!("{:#?}", l.suppressed), Color::Magenta),
+                                                        (
+                                                            format!("{}", l.submitted_in),
+                                                            Color::Yellow,
+                                                        ),
+                                                        (
+                                                            format!("{:#?}", l.suppressed),
+                                                            Color::Magenta,
+                                                        ),
                                                     ],
                                                 );
                                             }
                                             // TODO
-                                            None => println!("Account has no nominations")
+                                            None => println!("Account has no nominations"),
                                         },
-                                        None => { 
-                                            println!("{} is not on current nominators list", account);
-                                            continue
+                                        None => {
+                                            println!(
+                                                "{} is not on current nominators list",
+                                                account
+                                            );
+                                            continue;
                                         }
                                     }
                                 } else {
@@ -238,8 +279,14 @@ pub fn main() {
                                                     vec![
                                                         (format!("{}", k), Color::Blue),
                                                         (format!("{:#?}", targets), Color::Yellow),
-                                                        (format!("{}", l.submitted_in), Color::Yellow),
-                                                        (format!("{:#?}", l.suppressed), Color::Magenta),
+                                                        (
+                                                            format!("{}", l.submitted_in),
+                                                            Color::Yellow,
+                                                        ),
+                                                        (
+                                                            format!("{:#?}", l.suppressed),
+                                                            Color::Magenta,
+                                                        ),
                                                     ],
                                                 );
                                             }
@@ -259,7 +306,7 @@ pub fn main() {
                     }
                     Err(e) => {
                         println!("{}", e);
-                        continue
+                        continue;
                     }
                 }
             }
@@ -275,7 +322,7 @@ pub fn main() {
                 println!("Error: {:?}", err);
                 break;
             }
-        }    
+        }
     }
 }
 

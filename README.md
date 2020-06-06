@@ -69,7 +69,10 @@ This tool currently works with Polkadot: v0.8.1
 1. Cargo build --release
 1. `./target/release/dumpling` to enter the mini terminal
 
-Example: 
+Example:
+
+In the dumpling terminal: 
+`validators -w -a=<AccountId>`
 ![myimage-alt-tag](./example.png)
 
 #### Lib
