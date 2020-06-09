@@ -1,6 +1,7 @@
+use chrono::{TimeZone, Utc};
 use clap::{load_yaml, App, Error, ErrorKind};
 use comfy_table::*;
-use dumpling::{ApiFilling, Ss58Codec};
+use dumpling::{ApiFilling, Nominator, Ss58Codec, WaitingValidator};
 use rustyline::{error::ReadlineError, Editor};
 use shellwords::split;
 use std::collections::HashMap;
@@ -24,16 +25,27 @@ pub fn main() {
                         ("pulse", Some(p_matches)) => {
                             if p_matches.is_present("activeEra") {
                                 let mut t = Table::new();
-                                table_header(&mut t, vec!["Active Era"], 80);
-                                add_row(
-                                    &mut t,
-                                    vec![(
-                                        format!("{:?}", d.active_era(None).unwrap()),
-                                        Color::Blue,
-                                    )],
-                                );
-
-                                println!("{}", t);
+                                table_header(&mut t, vec!["Active Era Index", "Started at"], 80);
+                                let a = d.active_era(None);
+                                match a {
+                                    Some(info) => {
+                                        let time = match info.start {
+                                            Some(ts) => {
+                                                (Utc.timestamp((ts / 1000) as i64, 0)).to_rfc2822()
+                                            }
+                                            None => String::from("Era has not started yet"),
+                                        };
+                                        add_row(
+                                            &mut t,
+                                            vec![
+                                                (format!("{}", info.index), Color::Blue),
+                                                (time, Color::Blue),
+                                            ],
+                                        );
+                                        println!("{}", t);
+                                    }
+                                    None => println!("Active era information not available"),
+                                }
                             } else if p_matches.is_present("block") {
                                 let mut t = Table::new();
                                 table_header(
@@ -134,10 +146,9 @@ pub fn main() {
                                     &mut t,
                                     vec![
                                         "Waiting Validator Stash",
-                                        "Total",
-                                        "Active",
-                                        "Unlocking",
+                                        "Own Staked",
                                         "Claimed",
+                                        "Nominators",
                                         "Commission",
                                     ],
                                     160,
@@ -145,82 +156,19 @@ pub fn main() {
                                 let m = d.waiting_validators(None);
 
                                 let mut t_total = Table::new();
-                                t_total.set_header(vec![
-                                    Cell::new("Total Waiting Validators")
-                                        .add_attribute(Attribute::Bold)
-                                        .bg(Color::Black)
-                                        .fg(Color::Magenta),
-                                    Cell::new(format!("{}", m.keys().len()))
-                                        .bg(Color::Black)
-                                        .fg(Color::Blue),
-                                ]);
-
+                                table_header(&mut t_total, vec!["Total Waiting Validators"], 80);
+                                add_row(&mut t_total, vec![(m.keys().len().to_string(), Color::Yellow)]);
                                 println!("{}", t_total);
-                                if let Some(account) = v_matches.value_of("accountId") {
-                                    match m.get(account) {
-                                        Some(a) => {
-                                            let mut row = vec![
-                                                (account.to_string(), Color::Blue),
-                                                ("---".to_string(), Color::Yellow),
-                                                ("---".to_string(), Color::Yellow),
-                                                ("---".to_string(), Color::Yellow),
-                                                ("---".to_string(), Color::Yellow),
-                                                (
-                                                    format!(
-                                                        "{:?}",
-                                                        a.1.as_ref().unwrap().commission
-                                                    ),
-                                                    Color::Magenta,
-                                                ),
-                                            ];
-                                            if let Some(l) = &a.0 {
-                                                let n = [
-                                                    (format!("{}", l.total), Color::Yellow),
-                                                    (format!("{}", l.active), Color::Yellow),
-                                                    (format!("{:#?}", l.unlocking), Color::Yellow),
-                                                    (
-                                                        format!("{:#?}", l.claimed_rewards),
-                                                        Color::Yellow,
-                                                    ),
-                                                ];
-                                                row.splice(1..5, n.iter().cloned());
-                                            }
-                                            add_row(&mut t, row);
-                                        }
-                                        None => println!(
-                                            "{} is not on the waiting validators list",
-                                            account
-                                        ),
-                                    }
-                                } else {
-                                    for (k, v) in m.iter() {
-                                        let mut row = vec![
-                                            (k.clone(), Color::Blue),
-                                            ("---".to_string(), Color::Yellow),
-                                            ("---".to_string(), Color::Yellow),
-                                            ("---".to_string(), Color::Yellow),
-                                            ("---".to_string(), Color::Yellow),
-                                            (
-                                                format!("{:?}", v.1.as_ref().unwrap().commission),
-                                                Color::Magenta,
-                                            ),
-                                        ];
-                                        if let Some(l) = &v.0 {
-                                            let n = [
-                                                (format!("{}", l.total), Color::Yellow),
-                                                (format!("{}", l.active), Color::Yellow),
-                                                (format!("{:#?}", l.unlocking), Color::Yellow),
-                                                (
-                                                    format!("{:#?}", l.claimed_rewards),
-                                                    Color::Yellow,
-                                                ),
-                                            ];
-                                            row.splice(1..5, n.iter().cloned());
-                                        }
 
-                                        add_row(&mut t, row);
+                                match v_matches.value_of("accountId") {
+                                    Some(id) => display_validators(&mut t, &m, &id),
+                                    None => {
+                                        for i in m.keys() {
+                                            display_validators(&mut t, &m, i)
+                                        }
                                     }
                                 }
+
                                 println!("{}", t);
                             } else {
                                 println!("Missing / Incorrect Arg; try --help for information");
@@ -230,64 +178,29 @@ pub fn main() {
                             let mut t = Table::new();
                             table_header(
                                 &mut t,
-                                vec!["Nominator Stash", "Targets", "Era Submitted", "Suppressed"],
+                                vec![
+                                    "Nominator Stash",
+                                    "Staked",
+                                    "Nominated Validators",
+                                    "Era Submitted",
+                                    "Suppressed",
+                                ],
                                 160,
                             );
                             let m = d.nominators(None);
+                            let mut t_total = Table::new();
+                            table_header(&mut t_total, vec!["Total Nominators"], 80);
+                            add_row(&mut t_total, vec![(m.keys().len().to_string(), Color::Yellow)]);
+                            println!("{}", t_total);
 
-                            if let Some(account) = n_matches.value_of("accountId") {
-                                match m.get(account) {
-                                    Some(n) => match n {
-                                        Some(l) => {
-                                            let mut targets: Vec<String> = Vec::new();
-                                            for a in &l.targets {
-                                                targets.push(a.to_ss58check());
-                                            }
-                                            add_row(
-                                                &mut t,
-                                                vec![
-                                                    (account.to_string(), Color::Blue),
-                                                    (format!("{:#?}", targets), Color::Yellow),
-                                                    (format!("{}", l.submitted_in), Color::Yellow),
-                                                    (
-                                                        format!("{:#?}", l.suppressed),
-                                                        Color::Magenta,
-                                                    ),
-                                                ],
-                                            );
-                                        }
-                                        None => println!("Account has no nominations"),
-                                    },
-                                    None => {
-                                        println!("{} is not on current nominators list", account);
-                                        continue;
+                            match n_matches.value_of("accountId") {
+                                Some(id) => display_nominators(&mut t, &m, &id),
+                                None => {
+                                    for i in m.keys() {
+                                        display_nominators(&mut t, &m, i)
                                     }
                                 }
-                            } else {
-                                for (k, v) in m.iter() {
-                                    match &v {
-                                        Some(l) => {
-                                            let mut targets: Vec<String> = Vec::new();
-                                            for a in &l.targets {
-                                                targets.push(a.to_ss58check());
-                                            }
-                                            add_row(
-                                                &mut t,
-                                                vec![
-                                                    (format!("{}", k), Color::Blue),
-                                                    (format!("{:#?}", targets), Color::Yellow),
-                                                    (format!("{}", l.submitted_in), Color::Yellow),
-                                                    (
-                                                        format!("{:#?}", l.suppressed),
-                                                        Color::Magenta,
-                                                    ),
-                                                ],
-                                            );
-                                        }
-                                        None => continue,
-                                    }
-                                }
-                            }
+                            };
                             println!("{}", t);
                         }
                         ("exit", Some(_)) => {
@@ -304,11 +217,11 @@ pub fn main() {
                 }
             }
             Err(ReadlineError::Interrupted) => {
-                println!("Bye! CTRL-C");
+                println!("Bye!");
                 break;
             }
             Err(ReadlineError::Eof) => {
-                println!("CTRL-D");
+                println!("Bye!");
                 break;
             }
             Err(err) => {
@@ -340,4 +253,54 @@ fn add_row(t: &mut Table, rows: Vec<(String, Color)>) {
         t_row.push(Cell::new(r.0).bg(Color::Black).fg(r.1));
     }
     t.add_row(t_row);
+}
+
+fn display_nominators(t: &mut Table, m: &HashMap<String, Option<Nominator>>, i: &str) {
+    match m.get(i) {
+        Some(nominator) => {
+            if let Some(n) = nominator {
+                let mut targets: Vec<String> = Vec::new();
+                for a in &(n.nominations).targets {
+                    targets.push(a.to_ss58check());
+                }
+                add_row(
+                    t,
+                    vec![
+                        (i.to_string(), Color::Blue),
+                        (format!("{:#?}", n.staked), Color::Yellow),
+                        (format!("{:?}", targets), Color::Red),
+                        (format!("{}", n.nominations.submitted_in), Color::Yellow),
+                        (format!("{:#?}", n.nominations.suppressed), Color::Magenta),
+                    ],
+                );
+            }
+        }
+        None => {
+            println!("{} is not on current nominators list", i);
+        }
+    }
+}
+
+fn display_validators(t: &mut Table, m: &HashMap<String, WaitingValidator>, i: &str) {
+    match m.get(i) {
+        Some(a) => {
+            let mut row = vec![
+                (i.to_string(), Color::Blue),
+                (a.staked.to_string(), Color::Green),
+                ("---".to_string(), Color::Yellow),
+                (format!("{:?}", a.nominators), Color::Yellow),
+                (
+                    format!("{:?}", a.prefs.commission),
+                    Color::Magenta,
+                ),
+            ];
+            if let Some(l) = &a.ledger {
+                let n = [(format!("{:#?}", l.claimed_rewards), Color::Green)];
+                row.splice(2..3, n.iter().cloned());
+            }
+
+            add_row(t, row);
+        }
+        None => println!("{} is not on the waiting validators list", i),
+    }
 }

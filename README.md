@@ -5,13 +5,12 @@
 ***dumpling*** is a command line interface tool designed for polkadot network validators. In the current PoA phrase of Polkadot, ***dumpling*** provides useful information for validators on the state of the network. 
 ***dumpling*** current has 3 subcommands.
 
-`dumpling pulse` - for time dependent useful state information
+`pulse` - for time dependent useful state information
 ```
-dumpling-pulse
-useful state information such as session index
+useful state information
 
 USAGE:
-    dumpling pulse [FLAGS]
+    pulse [FLAGS]
 
 FLAGS:
     -a, --activeEra       Active Era
@@ -23,40 +22,37 @@ FLAGS:
 
 ```
 
-`dumpling validators` - for current validator lists
+`validators` - for current validator lists
 ```
-dumpling-validators
 lists of validators and their information
 
 USAGE:
-    dumpling validators [FLAGS] [OPTIONS]
+    validators [FLAGS] [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
-    -q, --queued     Queued validators with nominators' exposures and own exposure and ledger
+    -q, --queued     Queued validators with nominators' exposures and own exposure
     -s, --session    Session validators
     -V, --version    Prints version information
-    -w, --waiting    waiting validators with their stake ledger and preferences
+    -w, --waiting    Waiting validators with their stakes, nominators, ledger and preferences
 
 OPTIONS:
-    -a, --account <accountId>    get waiting validator by accountId 
-
+    -a, --account <accountId>    Get waiting validator by accountId
 ```
 
-`dumpling nominators` - for current nominator list
+`nominators` - for current nominator list
 ```
-dumpling-nominators
-list of nominators and their information
+list of nominators with their stakes, nomination details
 
 USAGE:
-    dumpling nominators [OPTIONS]
+    nominators [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -a, --account <accountId>    get nominator by accountId 
+    -a, --account <accountId>    Get nominator by accountId
 ```
 ___
 ## Usage
@@ -69,21 +65,26 @@ This tool currently works with Polkadot: v0.8.1
 1. Cargo build --release
 1. `./target/release/dumpling` to enter the mini terminal
 
-Example:
+#### Example - validators:
 
 In the dumpling terminal: 
-`validators -w -a=<AccountId>`
-![myimage-alt-tag](./example.png)
+`🥟 >> validators --waiting`
+![myimage-alt-tag](./example_validators.png)
+
+#### Example - nominators:
+
+In the dumpling terminal: 
+`🥟 >> nominators --account=15312eQRTAiAtNhX9VLFPAmJVqoxkxCJFCDHz6wDBMyZ5Q9X`
+![myimage-alt-tag](./example_nominators.png)
 
 #### Lib
-As specified in `Cargo.toml`, you can also use this project as a library for your project in rust or other native modules.
+You can also use this project as a library for your project in rust or other native modules.
 
 #### Limitations
 
 Due to the limited time for this challenge, currently this project works with a *_forked_* version of [substrate-api-client](https://github.com/scs/substrate-api-client). Changes made in this fork are:
-- added `get_key_prefix` method and `get_keys` in the rpc client
+- added `get_key_prefix` method and `get_keys` in the rpc client (Update [PR](https://github.com/scs/substrate-api-client/pull/95) merged)
 - removed requirement for default value for `get_storage_map` *(hack!)*
-- todo: update get_constants
 
 ***dumpling*** will collaborate with ***substrate-api-client*** to get the best solution for both projects.
 
@@ -97,9 +98,5 @@ Command-line Polkadot API interaction:
 - Command-line Polkadot API interaction: Create a way to send different extrinsics from the command line to do different tasks – like seeing the current block height, list of validators, extrinsics in last block, etc. 
 
 - Tools to help validators: Validators will be signaling their intention to nominate in the initial PoA phase. It would be great to have tools made specifically for them, such as seeing how much stake is behind others who have signaled their intention to validate.
-
-TODO:
-- active Era get time
-- parse int sp_arithmatic
 
 

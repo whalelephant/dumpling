@@ -19,6 +19,7 @@ comfy-table = "0.1.1"
 clap = { version = "~2.33", features = ["yaml"] }
 rustyline = "6.2.0"
 shellwords = "1.0.0"
+chrono = "0.4"
 
 [dependencies.substrate-api-client]
 git = "https://github.com/whalelephant/substrate-api-client"
@@ -43,6 +44,11 @@ default-features = false
 [dependencies.staking]
 version = '2.0.0-alpha.7'
 package = "pallet-staking"
+default-features=false
+
+[dependencies.balances]
+version = '2.0.0-alpha.7'
+package = "pallet-balances"
 default-features=false
 
 [dependencies.polkadot-primitives]

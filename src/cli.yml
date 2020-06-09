@@ -41,7 +41,7 @@ subcommands:
                 long: queued
                 short: q
             - waiting:
-                help: Waiting validators with their stake ledger and preferences
+                help: Waiting validators with their stakes, nominators, ledger and preferences
                 multiple: false
                 long: waiting
                 short: w
@@ -55,7 +55,7 @@ subcommands:
                 requires: waiting
                 conflicts_with: ["queued", "session"]
     - nominators:
-        about: list of nominators and their information
+        about: list of nominators with their stakes, nomination details
         args:
             - accountId:
                 help: Get nominator by accountId
