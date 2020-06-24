@@ -58,7 +58,8 @@ ___
 ## Usage
 
 #### Node
-This tool currently works with Polkadot: v0.8.1
+This tool currently works with Polkadot: v0.8.11 with ws connection at
+`127.0.0.1:9944`.
 
 #### CLI
 1. Clone this repo
