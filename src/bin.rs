@@ -121,25 +121,28 @@ pub fn main() {
                                     ],
                                     160,
                                 );
-                                let v = d.queued_validators(None).unwrap();
-                                for i in v.exposures {
-                                    let mut fmt_exposures = HashMap::new();
-                                    let indv_exposures = (i.1).others;
-                                    for e in indv_exposures {
-                                        fmt_exposures.insert(e.who.to_ss58check(), e.value);
+                                if let Some(v) = d.queued_validators(None){
+                                    for i in v.exposures {
+                                        let mut fmt_exposures = HashMap::new();
+                                        let indv_exposures = (i.1).others;
+                                        for e in indv_exposures {
+                                            fmt_exposures.insert(e.who.to_ss58check(), e.value);
+                                        }
+                                        add_row(
+                                            &mut t,
+                                            vec![
+                                                (i.0.to_ss58check(), Color::Blue),
+                                                (format!("{}", (i.1).total), Color::Yellow),
+                                                (format!("{}", (i.1).own), Color::Yellow),
+                                                (format!("{:#?}", fmt_exposures), Color::Magenta),
+                                            ],
+                                        );
                                     }
-                                    add_row(
-                                        &mut t,
-                                        vec![
-                                            (i.0.to_ss58check(), Color::Blue),
-                                            (format!("{}", (i.1).total), Color::Yellow),
-                                            (format!("{}", (i.1).own), Color::Yellow),
-                                            (format!("{:#?}", fmt_exposures), Color::Magenta),
-                                        ],
-                                    );
+                                    println!("{}", t);
+                                } else {
+                                    println!("None")
                                 }
 
-                                println!("{}", t);
                             } else if v_matches.is_present("waiting") {
                                 let mut t = Table::new();
                                 table_header(
