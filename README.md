@@ -2,8 +2,8 @@
 
 ## What is dumpling?
 
-***dumpling*** is a command line interface tool designed for polkadot network validators. In the current PoA phrase of Polkadot, ***dumpling*** provides useful information for validators on the state of the network. 
-***dumpling*** current has 3 subcommands.
+***dumpling*** is a command line interface tool designed for polkadot network validators. In the current PoA phase of Polkadot, ***dumpling*** provides useful information for validators on the state of the network. 
+***dumpling*** currently has 3 subcommands.
 
 `pulse` - for time dependent useful state information
 ```
